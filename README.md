@@ -53,12 +53,14 @@ Here are the key features of the game:
 - **`rpg_game.nat`**: Contains the main game logic.  
 - **Screenshots**: Images of the game interface.
 
-![User helpText](https://github.com/SergioGraciaCorreia/Natural-Mainframe-RPG/blob/main/screenshots/mapa%2002b.PNG)  
+![User helpText](https://github.com/SergioGraciaCorreia/Natural-Mainframe-RPG/blob/main/screenshots/mapa%2002b.PNG) 
+<!-- Espacio entre imágenes -->
 ![Combat](https://github.com/SergioGraciaCorreia/Natural-Mainframe-RPG/blob/main/screenshots/mapa%2003.PNG)  
   
   
 ## More Screenshots  
-You can find more screenshots in the [screenshots folder](/screenshots). 
+You can find more screenshots in the [screenshots folder](/screenshots).  
+
 ---
 
 ## 🎨 Credits  
