@@ -1,5 +1,6 @@
-# 🎮 RPG in Natural for Mainframe  
 
+# 🎮 RPG in Natural for Mainframe  
+<img width="952" alt="mapa 01" src="https://github.com/user-attachments/assets/7f857934-7402-4d92-b449-c58f8951f1ad" />
 **Welcome to the RPG in Natural!**  
 This is a roguelike RPG game developed in **Natural**, a programming language for mainframe environments. The game features turn-based combat, random events, and a simple world map.  
 
