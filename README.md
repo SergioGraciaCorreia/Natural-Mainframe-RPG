@@ -51,8 +51,14 @@ Here are the key features of the game:
 
 ## 📂 Code Structure  
 - **`rpg_game.nat`**: Contains the main game logic.  
-- **Screenshots**: Images of the game interface (to be added).  
+- **Screenshots**: Images of the game interface.
 
+![User helpText](https://github.com/SergioGraciaCorreia/Natural-Mainframe-RPG/blob/main/screenshots/mapa%2002b.PNG)  
+![Combat](https://github.com/SergioGraciaCorreia/Natural-Mainframe-RPG/blob/main/screenshots/mapa%2003.PNG)  
+  
+  
+## More Screenshots  
+You can find more screenshots in the [screenshots folder](/screenshots). 
 ---
 
 ## 🎨 Credits  
