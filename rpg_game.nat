@@ -39,7 +39,7 @@ LOCAL
 END-DEFINE                                                           
 ******************************************************************** 
 * -----------------------------------------------------                 
-* ENSURES YOUNG PEOPLE LIKE IVAN CANNOT PLAY THE GAME                   
+* ENSURES YOUNG PEOPLE CANNOT PLAY THE GAME                   
 * -----------------------------------------------------                 
 INPUT 'ARE YOU 18 YEARS OLD OR MORE ? (Y/N)' EXIT                       
 IF EXIT NE 'Y'                                                          
