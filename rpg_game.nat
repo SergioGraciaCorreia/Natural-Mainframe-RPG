@@ -1,0 +1,348 @@
+********************************************************************   
+* FORMACIÓN SEGUNDA TANDA 2024.                                        
+* AUTOR: SERGIO GRACIA CORREIA.                         
+* ------------------------------------------------------------------   
+* DESCRIPCIóN:                                                         
+* - VIDEOJUEGO RPG POR TURNOS INSPIRADO EN DARK SOULS.                 
+* - EVENTOS ALEATORIOS (AMPLIABLE).                                    
+* - JUNTA LO APRENDIDO EN LOS JUEGOS ANTERIORES.                       
+* - HELPTEXT CON MANUAL DE INSTRUCCIONES.                              
+*                                                                      
+* ------------------------------------------------------------------   
+DEFINE DATA                                                            
+LOCAL                                                                  
+1 PLAYER                                                               
+  2 PLAYER-HP (N3)                                                     
+  2 PLAYER-PO (N2)                                                     
+  2 PLAYER-SP (N1)                                                     
+1 ENEMY                                                                
+  2 ENEMY-HP  (N3)                                                     
+  2 ENEMY-PO  (N2)                                                     
+  2 ENEMY-SP  (N1)                                                   
+1 MAPA                                                               
+  2 POSICION (N1)                                                    
+  2 CASILLAS (A1/6) INIT <'_','_','_','_','_', '_'>                  
+  2 EXIT (A1)                                                        
+  2 STAGE (A16)                                                      
+  2 HELP (A1)                                                        
+1 GAMELOOP                                                           
+  2 EFFECT (A60)                                                     
+  2 NUM-RANDOM   (N2)                                                
+  2 INTERVALO    (N2)                                                
+  2 COCIENTE (N7)                                                    
+1 DRAW                                                               
+  2 HOGUERA   (A10) INIT <'. ((())) .'>                              
+  2 HOGUERA2  (A6)  INIT <'. (())'>                                  
+  2 HOGUERA3  (A5)  INIT <'()  .'>                                   
+  2 HIERBA1   (A38) INIT<'\\\\/////\\\\\//////\\\\\///////\\\\\/'>   
+  2 HIERBA2   (A38) INIT<'\\\\/////\\\\\//////\\\\\///////\\\\\/'>   
+END-DEFINE                                                           
+******************************************************************** 
+* -----------------------------------------------------                 
+* ENSURES YOUNG PEOPLE LIKE IVAN CANNOT PLAY THE GAME                   
+* -----------------------------------------------------                 
+INPUT 'ARE YOU 18 YEARS OLD OR MORE ? (Y/N)' EXIT                       
+IF EXIT NE 'Y'                                                          
+  WRITE 'YOU CANNOT PLAY THIS GAME.'                                    
+  ESCAPE MODULE                                                         
+END-IF                                                                  
+IF EXIT EQ 'Y'                                                          
+  PERFORM START-SCREEN                                                  
+END-IF                                                                  
+**********************************************************************  
+DEFINE START-SCREEN         /* WE RETURN HERE WHEN GAME-OVER OR ENDING  
+**********************************************************************  
+MOVE 100 TO PLAYER-HP                                                   
+MOVE 3 TO PLAYER-PO                                                     
+MOVE 1 TO PLAYER-SP                                                     
+SET KEY ALL                                                             
+REP1. REPEAT                                                            
+  RESET MAPA                                                            
+  INPUT USING MAP 'SGCMDARK'                                        
+  DECIDE ON FIRST VALUE OF *PF-KEY                                  
+    VALUE 'PF3' ESCAPE MODULE                                       
+    VALUE 'ENTR' PERFORM WORLD-MAP                                  
+    NONE VALUE WRITE 'NOT A VALID KEY'                              
+  END-DECIDE                                                        
+END-REPEAT                                                          
+END-SUBROUTINE                                                      
+******************************************************************  
+DEFINE WORLD-MAP/* MANAGES THE WORLD-MAP LOGIC                      
+******************************************************************  
+MOVE 100 TO ENEMY-HP                                                
+MOVE 1 TO ENEMY-PO                                                  
+MOVE 1 TO ENEMY-SP                                                  
+RESET EFFECT                                                        
+* -----------------------------                                     
+* WORLD MAP POSITION                                                
+* -----------------------------                                     
+IF POSICION LT 7                                                    
+  ADD 1 TO POSICION                                                 
+   PERFORM STAGE-NAME                                              
+   MOVE 'X' TO CASILLAS(POSICION)                                  
+ END-IF                                                            
+ IF POSICION GT 1                                                  
+   MOVE ' ' TO CASILLAS(POSICION -1)                               
+ END-IF                                                            
+ * ----------------------------                                    
+ * WORLD MAP SCREEN ACTIVE                                         
+ * ----------------------------                                    
+ SET KEY ALL                                                       
+ REP2. REPEAT                                                      
+   INPUT USING MAP 'SGCMDMAP'                                      
+   DECIDE ON FIRST VALUE OF *PF-KEY                                
+     VALUE 'PF3'                                                   
+       INPUT (AD=I) 'ARE YOU SURE YOU WANT TO QUIT ? (Y/N)' EXIT   
+       IF EXIT EQ 'Y'                                              
+         ESCAPE MODULE                                             
+       END-IF                                                      
+     VALUE 'ENTR'                                                  
+       IF HELP EQ 'I'                                              
+        WRITE 'YOU USED A SECRET POWER' /* CHEATS, GOD MODE           
+        RESET PLAYER                                                  
+        ADD 500 TO PLAYER-HP                                          
+        ADD   5 TO PLAYER-PO                                          
+        ADD  9 TO PLAYER-SP                                           
+      END-IF                                                          
+ RESET HELP                                                           
+      PERFORM RANDOM-EVENT                                            
+    NONE VALUE WRITE 'NOT A VALID KEY'                                
+  END-DECIDE                                                          
+END-REPEAT                                                            
+END-SUBROUTINE                                                        
+********************************************************************* 
+DEFINE STAGE-NAME            /* DISPLAYS THE NAME IN WORLD-MAP SCREEN 
+********************************************************************* 
+DECIDE FOR FIRST CONDITION                                            
+  WHEN POSICION EQ 1 MOVE 'LIMGRAVE' TO STAGE                         
+  WHEN POSICION EQ 2 MOVE 'LIURNIA' TO STAGE                          
+  WHEN POSICION EQ 3 MOVE 'CAELID' TO STAGE                           
+  WHEN POSICION EQ 4 MOVE 'LEYNDELL' TO STAGE                         
+  WHEN POSICION EQ 5 MOVE 'ABYSSALWOODS'TO STAGE                        
+  WHEN POSICION EQ 6 MOVE 'STORMVEIL CASTLE' TO STAGE                   
+  WHEN NONE IGNORE                                                      
+END-DECIDE                                                              
+END-SUBROUTINE                                                          
+**********************************************************************  
+DEFINE RANDOM-EVENT     /* CHOSE WHAT HAPPENS IN THE CURRENT STAGE      
+**********************************************************************  
+PERFORM RANDOM-VALUE                                                    
+DECIDE FOR FIRST CONDITION                                              
+  WHEN POSICION EQ 5                                                    
+    PERFORM BONFIRE               /* ALWAYS BONFIRE BEFORE FINAL BOSS   
+  WHEN POSICION EQ 6                                                    
+  ADD 200 TO ENEMY-HP           /* POSICION 6 ALWAYS FINAL BOSS, MORE HP
+    RESET ENEMY-PO                                                      
+    MOVE 1 TO ENEMY-SP                                                  
+    PERFORM COMBAT-PLAYER                                               
+  WHEN NUM-RANDOM EQ 1                                                  
+    PERFORM BONFIRE               /* RESTORES HP AND POTIONS            
+  WHEN NUM-RANDOM EQ 2                                                  
+    PERFORM TREASURE              /* ADD +1 TO SPECIAL ATTACK           
+  WHEN NUM-RANDOM EQ 3                                                  
+    PERFORM STEAL                 /* RESET POTIONS                      
+  WHEN NUM-RANDOM EQ 4                                                  
+    PERFORM MIMIC                         /* PLAYER LOSES 20 HP         
+  WHEN NUM-RANDOM GT 4                                                  
+    PERFORM COMBAT-PLAYER                /* START COMBAT                
+  WHEN NONE IGNORE                                                      
+END-DECIDE                                                              
+END-SUBROUTINE                                                          
+**********************************************************************  
+DEFINE BONFIRE          /* BONFIRE STAGE, HEALS AND REPLENISH POTIONS   
+**********************************************************************  
+MOVE 100 TO PLAYER-HP                                                   
+MOVE 3 TO PLAYER-PO                                                     
+SET KEY ALL                                                             
+REP3. REPEAT                                                            
+  INPUT USING MAP 'SGCMDHOG'                                            
+  DECIDE ON FIRST VALUE OF *PF-KEY                                      
+    VALUE 'ENTR' PERFORM WORLD-MAP                                      
+    NONE VALUE WRITE 'NOT A VALID KEY'                                  
+  END-DECIDE                                                            
+END-REPEAT                                                              
+END-SUBROUTINE                                                          
+**********************************************************************  
+DEFINE TREASURE                  /* TREASURE STAGE, GIVES +1 SP ATTACK  
+**********************************************************************  
+ADD 1 TO PLAYER-SP                                                      
+SET KEY ALL                                                             
+REP4. REPEAT                                                            
+  INPUT USING MAP 'SGCMDTRE'                                            
+  DECIDE ON FIRST VALUE OF *PF-KEY                                      
+    VALUE 'ENTR' PERFORM WORLD-MAP                                      
+    NONE VALUE WRITE 'NOT A VALID KEY'                                  
+  END-DECIDE                                                            
+END-REPEAT                                                              
+END-SUBROUTINE                                                          
+************************************************************************
+DEFINE STEAL                     /* STEAL STAGE, STEALS POTIONS         
+************************************************************************
+RESET PLAYER-PO                                                        
+MOVE 'WHILE SLEEPING, SOMEONE STOLE YOUR POTIONS' TO EFFECT            
+SET KEY ALL                                                            
+REP5. REPEAT                                                           
+  INPUT USING MAP 'SGCMDCO3'                                           
+  DECIDE ON FIRST VALUE OF *PF-KEY                                     
+    VALUE 'ENTR' PERFORM WORLD-MAP                                     
+    NONE VALUE WRITE 'NOT A VALID KEY'                                 
+  END-DECIDE                                                           
+END-REPEAT                                                             
+END-SUBROUTINE                                                         
+********************************************************************** 
+DEFINE MIMIC                       /* MIMIC STAGE, PLAYER LOSES 20 HP  
+********************************************************************** 
+SUBTRACT 20 FROM PLAYER-HP                                             
+MOVE 'YOU FOUND A TREASURE, BUT IT WAS A MIMIC (-20 HP)' TO EFFECT     
+SET KEY ALL                                                            
+REP6. REPEAT                                                           
+  INPUT USING MAP 'SGCMDCO2'                                           
+  DECIDE ON FIRST VALUE OF *PF-KEY                                     
+    VALUE 'ENTR'                                                        
+      IF PLAYER-HP LT 1                                                 
+        PERFORM GAME-OVER                                               
+      END-IF                                                            
+      PERFORM WORLD-MAP                                                 
+    NONE VALUE WRITE 'NOT A VALID KEY'                                  
+  END-DECIDE                                                            
+END-REPEAT                                                              
+END-SUBROUTINE                                                          
+*********************************************************************** 
+DEFINE COMBAT-PLAYER                 /* LOGIC PLAYER TURN IN COMBAT     
+*********************************************************************** 
+SET KEY ALL                                                             
+IF POSICION EQ 6                                                        
+  INPUT USING MAP 'SGCMDCJE'                                            
+ELSE                                                                    
+  INPUT USING MAP 'SGCMDCOM'                                            
+END-IF                                                                  
+REP7. REPEAT                                                            
+  DECIDE ON FIRST VALUE OF *PF-KEY                                      
+    VALUE 'ENTR'                                                        
+      PERFORM COMBAT-ENEMY                                              
+    VALUE 'PF4'                                                         
+      SUBTRACT 30 FROM ENEMY-HP                                         
+      WRITE 'YOU ATTACKED. ENEMY LOSES 30 HP'                           
+      IF POSICION EQ 6 AND ENEMY-HP LT 1                                
+        WRITE 'CONGRATULATIONS, YOU KILLED THE DRAGON'                  
+        PERFORM ENDING                                                  
+      END-IF                                                            
+      IF POSICION NE 6 AND ENEMY-HP LT 1                                
+        PERFORM VICTORY                                                 
+      END-IF                                                            
+      IF ENEMY-HP GT 1                                                  
+        PERFORM COMBAT-ENEMY                                            
+      END-IF                                                            
+    VALUE 'PF5'                                                         
+      IF PLAYER-SP LT 1                                                 
+        WRITE 'YOU HAVE NO SPECIAL ATTACK. YOU LOSE YOUR TURN'          
+        PERFORM COMBAT-ENEMY                                            
+      END-IF                                                            
+      WRITE 'YOU DID A SPECIAL ATTACK. ENEMY LOSES 60 HP'           
+      SUBTRACT 60 FROM ENEMY-HP                                     
+      SUBTRACT 1 FROM PLAYER-SP                                     
+      IF POSICION EQ 6 AND ENEMY-HP LT 1                            
+        PERFORM ENDING                                              
+      END-IF                                                        
+      IF POSICION NE 6 AND ENEMY-HP LT 1                            
+        PERFORM VICTORY                                             
+      END-IF                                                        
+      PERFORM COMBAT-ENEMY                                          
+    VALUE 'PF6'                                                     
+      IF PLAYER-PO LT 1                                             
+        WRITE 'YOU HAVE NO POTIONS. YOU LOSE YOUR TURN'             
+        PERFORM COMBAT-ENEMY                                        
+      END-IF                                                        
+      WRITE 'YOU USED A POTION. +60 HP'                             
+      MOVE 'PLAYER HEALS 60 HP' TO EFFECT                           
+      ADD 60 TO PLAYER-HP                                           
+      SUBTRACT 1 FROM PLAYER-PO                                     
+      PERFORM COMBAT-ENEMY                                          
+    NONE VALUE                                                        
+      INPUT 'NOT A VALID KEY'                                         
+  END-DECIDE                                                          
+END-REPEAT                                                            
+END-SUBROUTINE                                                        
+********************************************************************* 
+DEFINE COMBAT-ENEMY       /* SIMPLE AI USING RANDOM AND 3 ACTIONS     
+********************************************************************* 
+RESET EFFECT                                                          
+PERFORM RANDOM-VALUE                                                  
+DECIDE FOR FIRST CONDITION                                            
+  WHEN NUM-RANDOM EQ 1                                                
+    IF ENEMY-PO LT 1                                                  
+      MOVE 'ENEMY DID NOTHING' TO EFFECT                              
+      PERFORM COMBAT-PLAYER                                           
+    END-IF                                                            
+    MOVE 'ENEMY HEALS 40 HP' TO EFFECT                                
+    ADD 40 TO ENEMY-HP                                                
+    SUBTRACT 1 FROM ENEMY-PO                                          
+    PERFORM COMBAT-PLAYER                                             
+  WHEN NUM-RANDOM EQ 2                                                  
+    IF ENEMY-SP LT 1                                                    
+      MOVE 'ENEMY DID NOTHING' TO EFFECT                                
+      PERFORM COMBAT-PLAYER                                             
+    END-IF                                                              
+    MOVE 'ENEMY DID A SPECIAL ATTACK. PLAYER LOSES 40 HP' TO EFFECT     
+    SUBTRACT 40 FROM PLAYER-HP                                          
+    SUBTRACT 1 FROM ENEMY-SP                                            
+    IF PLAYER-HP LT 1                                                   
+      PERFORM GAME-OVER                                                 
+    END-IF                                                              
+    PERFORM COMBAT-PLAYER                                               
+  WHEN NUM-RANDOM NE 1 AND NUM-RANDOM NE 2                              
+    MOVE 'ENEMY DID A NORMAL ATTACK. PLAYER LOSES 20 HP' TO EFFECT      
+    SUBTRACT 20 FROM PLAYER-HP                                          
+    IF PLAYER-HP LT 1                                                   
+      WRITE 'YOU ARE DEAD'                                              
+      PERFORM GAME-OVER                                                 
+    END-IF                                                              
+    PERFORM COMBAT-PLAYER                                               
+  WHEN NONE IGNORE                                                      
+END-DECIDE                                                              
+END-SUBROUTINE                                                          
+**********************************************************************  
+DEFINE VICTORY                     /* SCREEN AFTER VICTORY IN COMBAT    
+**********************************************************************  
+SET KEY ALL                                                             
+REP8. REPEAT                                                            
+  INPUT USING MAP 'SGCMDVIC'                                            
+  DECIDE ON FIRST VALUE OF *PF-KEY                                      
+    VALUE 'ENTR' PERFORM WORLD-MAP                                      
+    NONE VALUE WRITE 'NOT A VALID KEY'                                  
+  END-DECIDE                                                            
+END-REPEAT                                                              
+END-SUBROUTINE                                                          
+*********************************************************************   
+DEFINE GAME-OVER       /* GAME OVER SCREEN                              
+*********************************************************************   
+SET KEY ALL                                                             
+REP9. REPEAT                                                            
+  INPUT USING MAP 'SGCMDGAO'                                            
+  DECIDE ON FIRST VALUE OF *PF-KEY                                      
+    VALUE 'ENTR' PERFORM START-SCREEN                                   
+    NONE VALUE WRITE 'NOT A VALID KEY'                                  
+  END-DECIDE                                                            
+END-REPEAT                                                              
+END-SUBROUTINE                                                          
+*********************************************************************   
+DEFINE ENDING                     /* SCREEN WHEN FINISH THE GAME        
+*********************************************************************   
+SET KEY ALL                                                             
+REP10. REPEAT                                                           
+  INPUT USING MAP 'SGCMDWIN'                                            
+  DECIDE ON FIRST VALUE OF *PF-KEY                                      
+    VALUE 'ENTR' PERFORM START-SCREEN                                   
+    NONE VALUE WRITE 'NOT A VALID KEY'                                  
+  END-DECIDE                                                            
+END-REPEAT                                                              
+END-SUBROUTINE                                                           
+*********************************************************************** 
+DEFINE RANDOM-VALUE    /* RANDOM NUMBER FROM 1 TO 8                     
+*********************************************************************** 
+RESET NUM-RANDOM                                                        
+MOVE 8 TO INTERVALO                                                     
+DIVIDE INTERVALO INTO *TIMN GIVING COCIENTE REMAINDER NUM-RANDOM        
+ADD 1 TO NUM-RANDOM                                                     
+END-SUBROUTINE                                                          
+END 
